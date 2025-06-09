@@ -55,7 +55,7 @@ Apply the service:
 
 ```
 
-kubectl apply -f resources/service-ociapi.yaml
+kubectl apply -f resources/service-externalname.yaml
 
 ```
 
@@ -63,7 +63,7 @@ kubectl apply -f resources/service-ociapi.yaml
 
 ```
 
-kubectl apply -f resources/ingressroute-ociapi.yaml
+kubectl apply -f resources/ingressroute-teamoci3.yaml
 
 ```
 
@@ -159,8 +159,13 @@ https://idcs-5ba32fa3496f48289532f8fc10f47032.identity.oraclecloud.com/admin/v1/
 Add this URI in the Traefik Hub ([https://hub.traefik.io](https://hub.traefik.io)) Auth Settings configuration:
 
 - Go to **Auth settings → Gateway → JWT**
+
+![Auth Settings](img/1-auth_settings_hub.png)
+
 - Set the Token validation method to **JWKs URL**
 - Paste your `jwks_uri` in the field provided and Save
+
+![Gateway Access Settings](img/2-gateway_access_hub.png)
 
 This will configure Traefik Hub to validate JWTs issued by OCI, ensuring only properly authenticated requests reach your APIs.
 
@@ -169,6 +174,9 @@ This will configure Traefik Hub to validate JWTs issued by OCI, ensuring only pr
 To enable SSO, configure Traefik Hub to use OCI as an external OIDC Identity Provider:
 
 - In Auth settings, select the OIDC option in the Portal table.
+
+![IdP Settings](img/3-idp-settings_hub.png)
+
 - Fill out the form with:
   - **Issuer URL:** The OIDC discovery URL from OCI (ends with `/.well-known/openid-configuration`)
   - **Client ID and Client Secret:** From your OCI application registration.
@@ -182,10 +190,14 @@ In your OCI console you will need to add the Redirect URL:
 https://<EXTERNAL_IP>/oci-portal/callback
 
 ```
+![Redirect URL](img/4-oauth_redirect_url_oci.png)
 
 After saving, Traefik Hub will:
 
 - Switch the API Portal login to your OCI IdP, enabling SSO for users.
+
+![SSO Portal OCI](img/5-login_oci_sso.png)
+
 - Require JWT tokens issued by OCI for API access (API keys will be disabled automatically).
 
 For more details and advanced configuration, refer to the official documentation:  
@@ -198,20 +210,34 @@ https://doc.traefik.io/traefik-hub/authentication-authorization/idp/oidc
 - Log into your API Portal:  
   `https://<EXTERNAL_IP>/oci-portal` and sign in using your SSO account.
 
+![SSO Portal OCI](img/6-portal_login_oci.png)
+
 ### 5.1 Create an application in the API Portal
 
-- Click in the **Applications** tab
-- Click on **Create application**
+- Click on the **Applications** tab and click on **Create application**
+
+![Portal Applications 1](img/7-portal_applications_1.png)
+
 - Add a name and the `Application_id` (for OCI, this will be the `Client_id` creating the JWT and included as a claim in the JWT. You can confirm the `client_id` using JWT.io and one of your JWT tokens.)
+
+![Portal Applications 2](img/8-portal_applications_2.png)
 
 ### 5.2 Create a subscription in the API Portal
 
 - Click on “Add subscription” and select the plan that you want to have.
+
+![Portal Subscription 1](img/9-portal_subscription_1.png)
+
 - Select an application to use and the plan.
+
+![Portal Subscription 2](img/10-portal_subscription_2.png)
 
 ### 5.3 Test the API using the portal
 
 - Get a JWT from your IdP and test out your APIs in the API Portal
+
+![Portal OpenAPI](img/11-portal_openapi.png)
+
 
 ---
 
@@ -222,22 +248,3 @@ https://doc.traefik.io/traefik-hub/authentication-authorization/idp/oidc
 - Configure authentication using OCI's OIDC integration for robust security.
 
 For further details on the base setup, refer to the [Traefik Hub documentation for OCI](https://doc.traefik.io/traefik-hub/operations/oracle-oci/oci-apim-marketplace).
-
----
-
-## Resource Files Reference
-
-Place the following YAML files in the `/resources` folder of your repository.
-
-| File Name                     | Purpose                                          |
-|-------------------------------|--------------------------------------------------|
-| service-ociapi.yaml           | ExternalName Service for OCI API                 |
-| ingressroute-ociapi.yaml      | IngressRoute for external API                    |
-| middleware-stripprefix.yaml   | Middleware to strip path prefixes                |
-| api-resource.yaml             | Traefik Hub API resource                         |
-| apiplans.yaml                 | APIPlan definitions (Gold and Bronze)            |
-| catalog-items.yaml            | APICatalogItem definitions for API plans         |
-| apiportal.yaml                | API Portal resource                              |
-| ingressroute-portal.yaml      | IngressRoute for the API portal                  |
-
-Each `kubectl apply -f` command above references the corresponding file in this folder.
