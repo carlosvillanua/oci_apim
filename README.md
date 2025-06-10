@@ -51,27 +51,32 @@ kubectl create namespace apps
 
 ```
 
-Apply the service:
+Apply the service that will expose inside OKE the OCI API, change httpbin.org by your OCI API domain.
 
 ```
 
-kubectl apply -f resources/service-externalname.yaml
+export EXTERNAL_NAME=httpbin.org
+envsubst < resources/1-service.yaml | kubectl apply -f -
 
 ```
 
 #### 1.2 IngressRoute for External API
 
+This is the ingress route for your service
+
 ```
 
-kubectl apply -f resources/ingressroute-teamoci3.yaml
+kubectl apply -f resources/2-route.yaml
 
 ```
 
 #### 1.3 Middleware to Strip Prefix
 
+This is the middleware to strip the path prefix from the API and the Portal URL.
+
 ```
 
-kubectl apply -f resources/middleware-stripprefix.yaml
+kubectl apply -f resources/3-middleware.yaml
 
 ```
 
@@ -81,9 +86,17 @@ kubectl apply -f resources/middleware-stripprefix.yaml
 
 #### 2.1 API Resource for Traefik Hub
 
+Substitute the EXTERNAL_IP with the one from your load balancer and add your OpenAPI specification.
+
 ```
 
-kubectl apply -f resources/api-resource.yaml
+export EXTERNAL_IP=$(kubectl get svc -n traefik traefik -o jsonpath='{.status.loadBalancer.ingress.ip}')
+echo "Use EXTERNAL_IP=${EXTERNAL_IP}"
+
+export OVERRIDE_SERVER_URL="https://${EXTERNAL_IP}/ociapi"
+export OPENAPI_SPEC_URL="https://raw.githubusercontent.com/carlosvillanua/apidefinitions/refs/heads/master/httpbinoas.json"
+
+envsubst < 4-api.yaml | kubectl apply -f -
 
 ```
 
@@ -112,7 +125,7 @@ Apply the API plans:
 
 ```
 
-kubectl apply -f resources/apiplans.yaml
+kubectl apply -f resources/5-apiplans.yaml
 
 ```
 
@@ -120,7 +133,7 @@ kubectl apply -f resources/apiplans.yaml
 
 ```
 
-kubectl apply -f resources/catalog-items.yaml
+kubectl apply -f resources/6-catalog-items.yaml
 
 ```
 
@@ -131,20 +144,14 @@ kubectl apply -f resources/catalog-items.yaml
 #### 3.1 API Portal Resource
 
 ```
+export EXTERNAL_IP=$(kubectl get svc -n traefik traefik -o jsonpath='{.status.loadBalancer.ingress.ip}')
+echo "Use EXTERNAL_IP=${EXTERNAL_IP}"
 
-kubectl apply -f resources/apiportal.yaml
+export TRUSTED_URL="https://${EXTERNAL_IP}/oci-portal"
 
-```
-
-#### 3.2 Portal Routing
-
-```
-
-kubectl apply -f resources/ingressroute-portal.yaml
+envsubst < 7-portal.yaml | kubectl apply -f -
 
 ```
-
----
 
 ## 4. Securing Your OCI API with JWT and SSO
 
