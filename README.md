@@ -96,7 +96,7 @@ echo "Use EXTERNAL_IP=${EXTERNAL_IP}"
 export OVERRIDE_SERVER_URL="https://${EXTERNAL_IP}/ociapi"
 export OPENAPI_SPEC_URL="https://raw.githubusercontent.com/carlosvillanua/apidefinitions/refs/heads/master/httpbinoas.json"
 
-envsubst < 4-api.yaml | kubectl apply -f -
+envsubst < resources/4-api.yaml | kubectl apply -f -
 
 ```
 
@@ -149,7 +149,7 @@ echo "Use EXTERNAL_IP=${EXTERNAL_IP}"
 
 export TRUSTED_URL="https://${EXTERNAL_IP}/oci-portal"
 
-envsubst < 7-portal.yaml | kubectl apply -f -
+envsubst < resources/7-portal.yaml | kubectl apply -f -
 
 ```
 
