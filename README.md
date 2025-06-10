@@ -51,7 +51,7 @@ kubectl create namespace apps
 
 ```
 
-Apply the service that will expose inside OKE the OCI API, change httpbin.org by your OCI API domain.
+Apply the service that will expose inside OKE the OCI API, change httpbin.org with your OCI API domain.
 
 ```
 
