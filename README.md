@@ -28,7 +28,7 @@ traefik traefik/traefik \
 
 ## Example Configuration: Exposing an External API via Traefik with API Plans and Developer Portal
 
-**All referenced YAML files should be placed in your `/resources` folder in your GitHub repository.**
+**All referenced YAML files are placed in `/resources` folder in the GitHub repository.**
 
 Replace `<EXTERNAL_IP>` with your Load Balancer IP:
 
